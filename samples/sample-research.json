@@ -1,0 +1,207 @@
+{
+  "primary_keyword": "event registration and ticketing software",
+  "secondary_keywords": [
+    "registration flow builder",
+    "event ticketing and discounting",
+    "CRM integration for events",
+    "branded event registration pages",
+    "approval flows",
+    "on-site check-in"
+  ],
+  "category_label": "event registration and ticketing software",
+  "audience": "B2B event teams",
+  "year": 2026,
+  "tools": [
+    {
+      "name": "Zuddl",
+      "is_house": true,
+      "one_liner": "Zuddl is a unified event platform that pairs registration and ticketing with check-in, an attendee app, and CRM sync in one system.",
+      "url": "https://www.zuddl.com/platform/event-registration-and-ticketing-software",
+      "pricing": "From $10,000/year",
+      "pricing_url": "https://www.zuddl.com/pricing",
+      "g2_rating": "4.8/5",
+      "g2_url": "https://www.g2.com/products/zuddl/reviews",
+      "capterra_rating": "4.5/5",
+      "capterra_url": "https://www.capterra.com/p/215852/Zuddl/reviews/",
+      "strengths": [
+        "Drag-and-drop flow builder for multi-step, conditional registration without developer help.",
+        "Branded landing pages and embeddable widgets that keep the experience on the organizer's own domain.",
+        "Native, bi-directional sync with Salesforce, HubSpot, and Marketo so registrations and attendance update CRM records in real time.",
+        "Tiered ticketing with complex discounting, promo codes, and approval flows for invite-only audiences.",
+        "Registration connects directly to on-site check-in, badge printing, and the attendee app from the same platform."
+      ],
+      "gaps": [
+        "The breadth of the unified platform can create a learning curve during initial setup, though all plans include onboarding and first-event support."
+      ],
+      "best_for": "B2B teams that want registration, ticketing, check-in, and CRM data on one platform instead of stitched across point tools.",
+      "sources": [
+        "https://www.zuddl.com/pricing",
+        "https://www.g2.com/products/zuddl/reviews"
+      ]
+    },
+    {
+      "name": "Cvent",
+      "is_house": false,
+      "one_liner": "Cvent is an enterprise event management suite with a deep registration feature set built for large, complex programs.",
+      "url": "https://www.cvent.com/",
+      "pricing": "Custom pricing, requires sales conversation",
+      "pricing_url": null,
+      "g2_rating": "4.3/5",
+      "g2_url": "https://www.g2.com/products/cvent-event-management/reviews",
+      "capterra_rating": "4.4/5",
+      "capterra_url": null,
+      "strengths": [
+        "Granular registration paths with session capacity rules, waitlists, and complex approval logic.",
+        "Mature reporting across the full event lifecycle within one vendor ecosystem.",
+        "Large integration catalog covering major CRMs and marketing automation tools."
+      ],
+      "gaps": [
+        "Setup is heavy: reviewers report months of configuration and sometimes external consultants.",
+        "Interface and registration pages feel dated compared with newer platforms.",
+        "Total cost runs high once add-on modules are included."
+      ],
+      "best_for": "Enterprises with an existing Cvent contract running a high volume of complex, multi-session conferences.",
+      "sources": [
+        "https://www.g2.com/products/cvent-event-management/reviews"
+      ]
+    },
+    {
+      "name": "Swoogo",
+      "is_house": false,
+      "one_liner": "Swoogo is a registration-first platform known for flexible forms and pages without per-registration fees.",
+      "url": "https://swoogo.com/",
+      "pricing": "From $12,000/year",
+      "pricing_url": null,
+      "g2_rating": "4.7/5",
+      "g2_url": "https://www.g2.com/products/swoogo/reviews",
+      "capterra_rating": "4.8/5",
+      "capterra_url": null,
+      "strengths": [
+        "Highly customizable registration forms and landing pages with conditional logic.",
+        "Flat annual pricing with unlimited events and registrations rather than per-ticket fees.",
+        "Strong reporting and a clean admin experience that teams set up without developers."
+      ],
+      "gaps": [
+        "Not a full virtual or attendee-app platform; on-site features are lighter.",
+        "Some integrations require setup or middleware to reach real-time CRM sync."
+      ],
+      "best_for": "Mid-market teams that want deep registration customization and predictable pricing without enterprise overhead.",
+      "sources": [
+        "https://www.g2.com/products/swoogo/reviews"
+      ]
+    },
+    {
+      "name": "Eventbrite",
+      "is_house": false,
+      "one_liner": "Eventbrite is a fast-to-launch ticketing platform with built-in payments and an audience discovery marketplace.",
+      "url": "https://www.eventbrite.com/organizer/overview/",
+      "pricing": "Free for free events; paid tiers from a per-ticket fee",
+      "pricing_url": "https://www.eventbrite.com/organizer/pricing/",
+      "g2_rating": "4.3/5",
+      "g2_url": "https://www.g2.com/products/eventbrite/reviews",
+      "capterra_rating": "4.6/5",
+      "capterra_url": null,
+      "strengths": [
+        "Quick setup and built-in payment processing for paid tickets.",
+        "Public discovery marketplace can drive incremental registrations.",
+        "Familiar attendee checkout that needs little explanation."
+      ],
+      "gaps": [
+        "Limited branding and no true white-label registration experience.",
+        "Light CRM and marketing integrations relative to B2B-focused tools.",
+        "Not built for complex, multi-track or invite-only B2B registration."
+      ],
+      "best_for": "Smaller or community-style events and B2C-leaning programs where speed and reach beat deep customization.",
+      "sources": [
+        "https://www.eventbrite.com/organizer/pricing/"
+      ]
+    },
+    {
+      "name": "Splash",
+      "is_house": false,
+      "one_liner": "Splash focuses on beautifully branded event pages and email for distributed marketing teams running many events.",
+      "url": "https://splashthat.com/",
+      "pricing": "Custom pricing, requires sales conversation",
+      "pricing_url": null,
+      "g2_rating": "4.4/5",
+      "g2_url": "https://www.g2.com/products/splash/reviews",
+      "capterra_rating": "4.7/5",
+      "capterra_url": null,
+      "strengths": [
+        "On-brand registration pages and templates that scale across many events and teams.",
+        "Good marketing-stack integrations for email and attribution.",
+        "Approval and brand-control features suited to distributed field-marketing teams."
+      ],
+      "gaps": [
+        "Lighter on complex ticketing and payment scenarios.",
+        "Reporting depth trails dedicated registration or enterprise platforms."
+      ],
+      "best_for": "Brand-led field marketing teams running a high volume of smaller events that must stay on-brand.",
+      "sources": [
+        "https://www.g2.com/products/splash/reviews"
+      ]
+    },
+    {
+      "name": "Bizzabo",
+      "is_house": false,
+      "one_liner": "Bizzabo is an event experience platform that unifies the event website, registration, and attendee app.",
+      "url": "https://www.bizzabo.com/",
+      "pricing": "From $17,999/year",
+      "pricing_url": null,
+      "g2_rating": "4.3/5",
+      "g2_url": "https://www.g2.com/products/bizzabo/reviews",
+      "capterra_rating": "4.4/5",
+      "capterra_url": null,
+      "strengths": [
+        "Shared content backend keeps the event website and registration in sync.",
+        "Klik wearable integration captures on-site engagement data.",
+        "Solid analytics across registration and attendance."
+      ],
+      "gaps": [
+        "Customization beyond basic branding is limited for some page types.",
+        "Iframe-based pages can create tracking gaps for GA4 or attribution tools.",
+        "Pricing sits at the higher end for mid-market budgets."
+      ],
+      "best_for": "Marketing teams running branded user conferences that want website, registration, and app unified.",
+      "sources": [
+        "https://www.g2.com/products/bizzabo/reviews"
+      ]
+    }
+  ],
+  "dimensions": [
+    {
+      "name": "registration flow flexibility",
+      "why": "Without conditional, multi-path forms you end up with manual workarounds for VIPs, sessions, and approvals."
+    },
+    {
+      "name": "branding and white-labeling",
+      "why": "A generic, vendor-branded page lowers conversion and weakens brand trust before the event even starts."
+    },
+    {
+      "name": "ticketing and payments",
+      "why": "Tiered pricing, discounts, and reliable payment processing decide whether finance trusts the numbers."
+    },
+    {
+      "name": "CRM and marketing sync",
+      "why": "Delayed or one-way sync means sales and marketing chase stale lists after the event."
+    },
+    {
+      "name": "approval and invite workflows",
+      "why": "Curated audiences need approval gates, or you cannot run invite-only or partner tracks cleanly."
+    },
+    {
+      "name": "on-site check-in integration",
+      "why": "If registration does not feed check-in and badges, you re-enter data and queues build at the door."
+    },
+    {
+      "name": "reporting and analytics",
+      "why": "Registration, revenue, and attendance numbers should export cleanly, or you rebuild reports by hand."
+    },
+    {
+      "name": "scalability and reliability",
+      "why": "High-volume on-sales and global events expose platforms that buckle under load or lack localization."
+    }
+  ],
+  "mode": "mock",
+  "model": ""
+}

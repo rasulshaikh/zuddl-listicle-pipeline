@@ -1,0 +1,38 @@
+# House style — edit this to retune voice/brand without touching code.
+brand: Zuddl
+year: 2026
+canonical_base: "https://www.zuddl.com/blog/"
+
+# Voice guidance injected into every generation prompt.
+voice:
+  - "Direct, consultative, and concrete — like a senior practitioner advising a peer."
+  - "Present tense, active voice, short paragraphs."
+  - "Specific over vague: name features, numbers, and use cases."
+  - "Balanced and credible: honest about trade-offs, including the house product's."
+  - "No hype, no filler, no second-person cheerleading."
+
+# Soft QA fails if any of these appear (the usual LLM tells).
+banned_phrases:
+  - "in today's fast-paced"
+  - "in the world of"
+  - "ever-evolving"
+  - "delve"
+  - "seamless"
+  - "robust"
+  - "leverage"
+  - "unlock"
+  - "elevate"
+  - "game-changer"
+  - "game changer"
+  - "navigate the complexities"
+  - "it's important to note"
+  - "in conclusion"
+  - "look no further"
+  - "tapestry"
+  - "testament to"
+  - "when it comes to"
+
+# Appended before the footer in every draft.
+cta_markdown: |
+  ---
+  **See it in action.** [Book a Zuddl demo](https://www.zuddl.com/request-a-demo) to walk through registration, check-in, and CRM sync on one platform.

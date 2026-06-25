@@ -1,0 +1,15 @@
+# One listicle = one of these files. This is the standard input the brief asks for.
+primary_keyword: "event registration and ticketing software"
+category_label: "event registration and ticketing software"   # lowercase; used in section headers
+audience: "B2B event teams"
+year: 2026
+tool_count: 6
+house_product: "Zuddl"                                          # always placed #1
+
+secondary_keywords:
+  - "registration flow builder"
+  - "event ticketing and discounting"
+  - "CRM integration for events"
+  - "branded event registration pages"
+  - "approval flows"
+  - "on-site check-in"
