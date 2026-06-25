@@ -6,6 +6,8 @@ touches the open web. Its output is what a human reviews at gate 1.
 """
 from __future__ import annotations
 
+from datetime import date
+
 from .llm import LLMClient
 from .schema import Dimension, ResearchBundle, ToolProfile
 
@@ -41,4 +43,5 @@ def run(client: LLMClient, inp: dict, house_style: dict, mode: str, model: str) 
         dimensions=dims,
         mode=mode,
         model=model,
+        researched_at=date.today().isoformat(),
     )

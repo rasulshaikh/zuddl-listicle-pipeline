@@ -5,15 +5,19 @@ Two commands mirror the two human gates:
   research   stage 1 -> writes research.json, then STOPS for human review (gate 1)
   generate   stages 2-4 -> writes draft.md + qa_report.md, STOPS for review (gate 2)
   all        runs both back-to-back (skips the pause; for mock demos / CI)
+  batch      runs many keyword sets from a CSV -> drafts + a triage SUMMARY.md
 
 Examples
   python -m pipeline.run research --input config/categories/event_registration.yaml --mock
   python -m pipeline.run generate --research output/<slug>/research.json --mock
   python -m pipeline.run all --input config/categories/event_registration.yaml --mock
+  python -m pipeline.run batch --csv config/batch_example.csv --mock
 """
 from __future__ import annotations
 
 import argparse
+import csv
+import datetime
 import os
 import sys
 from pathlib import Path
@@ -97,15 +101,20 @@ def do_generate(args, bundle: ResearchBundle | None = None) -> int:
     md = assemble.run(bundle, sections, hs)
     print("[3/3] Running QA...")
     report = qa.run(md, bundle, sections, hs, check_links=args.check_links)
+    editorial = None if getattr(args, "no_review", False) else client.score_editorial(md, bundle)
 
     out = _outdir(sections.slug or bundle.category_label, args.out)
     (out / "draft.md").write_text(md)
-    _write_report(out / "qa_report.md", report, sections)
+    _write_report(out / "qa_report.md", report, sections, editorial)
 
     print(f"\n  QA  ({report.word_count} words · ~{report.read_minutes} min read)")
     for c in report.checks:
         mark = {"pass": "PASS", "warn": "WARN", "fail": "FAIL", "skip": "skip"}[c.status]
         print(f"   [{mark}] {c.name:<26} {c.detail}")
+    if editorial:
+        print(f"\n  editorial review: {editorial['score']}/100 — {editorial['verdict']}")
+        for issue in editorial.get("issues", []):
+            print(f"    · {issue}")
     print(f"\n  -> {out/'draft.md'}\n  -> {out/'qa_report.md'}")
     _print_usage(client)
 
@@ -116,13 +125,17 @@ def do_generate(args, bundle: ResearchBundle | None = None) -> int:
     return 0
 
 
-def _write_report(path: Path, report, sections: GeneratedSections):
+def _write_report(path: Path, report, sections: GeneratedSections, editorial=None):
     lines = [f"# QA report — {sections.title}", "",
              f"- words: {report.word_count}  ·  read time: ~{report.read_minutes} min",
              f"- hard fail: {report.hard_fail}", "", "| check | status | detail |",
              "| --- | --- | --- |"]
     for c in report.checks:
         lines.append(f"| {c.name} | {c.status.upper()} | {c.detail} |")
+    if editorial:
+        lines += ["", f"## Editorial review — {editorial['score']}/100",
+                  f"_{editorial['verdict']}_", ""]
+        lines += [f"- {i}" for i in editorial.get("issues", [])] or ["- (no issues flagged)"]
     path.write_text("\n".join(lines) + "\n")
 
 
@@ -130,6 +143,69 @@ def do_all(args) -> int:
     bundle = do_research(args)
     print("\n--- (gate 1 auto-approved in `all` mode) ---\n")
     return do_generate(args, bundle=bundle)
+
+
+def do_batch(args) -> int:
+    """High-volume path: one row per listicle. Produces drafts + a triage summary.
+
+    The human gate becomes a *review queue* — instead of pausing on every article,
+    the run flags which drafts have warnings/failures so a human triages only those.
+    """
+    hs = _house_style()
+    mode = "mock" if args.mock else "live"
+    rows = list(csv.DictReader(Path(args.csv).open()))
+    if not rows:
+        sys.exit("ERROR: CSV has no rows.")
+    stamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+    base = Path(args.out) if args.out else ROOT / "output" / f"batch_{stamp}"
+    base.mkdir(parents=True, exist_ok=True)
+    client = _client(args.mock, args.model, hs, args.fixtures)
+
+    summary = []
+    for i, row in enumerate(rows, 1):
+        inp = {
+            "primary_keyword": row["primary_keyword"],
+            "category_label": row.get("category_label") or row["primary_keyword"],
+            "audience": row["audience"],
+            "year": int(row["year"]),
+            "tool_count": int(row["tool_count"]),
+            "house_product": row["house_product"],
+            "secondary_keywords": [s.strip() for s in row.get("secondary_keywords", "").split("|") if s.strip()],
+        }
+        print(f"[{i}/{len(rows)}] {inp['category_label']} ({mode})...")
+        try:
+            bundle = research.run(client, inp, hs, mode, "" if args.mock else args.model)
+            sections = generate.run(client, bundle, hs, humanize=args.humanize)
+            md = assemble.run(bundle, sections, hs)
+            report = qa.run(md, bundle, sections, hs, check_links=args.check_links)
+            d = base / (sections.slug or inp["category_label"].replace(" ", "-"))
+            d.mkdir(parents=True, exist_ok=True)
+            (d / "draft.md").write_text(md)
+            (d / "research.json").write_text(bundle.model_dump_json(indent=2))
+            _write_report(d / "qa_report.md", report, sections)
+            warns = sum(c.status == "warn" for c in report.checks)
+            fails = sum(c.status == "fail" for c in report.checks)
+            status = "FAIL" if report.hard_fail else ("WARN" if warns else "PASS")
+            summary.append((inp["primary_keyword"], len(bundle.tools), report.word_count,
+                            status, fails, warns, d.name))
+        except Exception as e:
+            summary.append((inp["primary_keyword"], 0, 0, "ERROR", 1, 0, str(e)[:48]))
+
+    lines = ["# Batch run summary", "",
+             f"- generated: {stamp}  ·  rows: {len(rows)}  ·  mode: {mode}", "",
+             "| keyword | tools | words | QA | hard fails | warnings | output |",
+             "| --- | --- | --- | --- | --- | --- | --- |"]
+    for kw, ntools, w, st, f, wn, name in summary:
+        lines.append(f"| {kw} | {ntools} | {w} | {st} | {f} | {wn} | {name} |")
+    (base / "SUMMARY.md").write_text("\n".join(lines) + "\n")
+
+    print(f"\n  {'KEYWORD':<46}{'QA':<6}WORDS")
+    for kw, ntools, w, st, f, wn, name in summary:
+        print(f"   {kw[:44]:<46}{st:<6}{w}")
+    print(f"\n  -> {base/'SUMMARY.md'}")
+    _print_usage(client)
+    print("  Review queue (gate 2 at scale): triage any WARN / FAIL / ERROR rows.")
+    return 1 if any(s[3] in ("FAIL", "ERROR") for s in summary) else 0
 
 
 # --------------------------------------------------------------------------- #
@@ -153,12 +229,18 @@ def main():
     pa.add_argument("--out")
     pa.set_defaults(func=do_all)
 
-    for x in (pr, pg, pa):
+    pb = sub.add_parser("batch", help="many keyword sets from a CSV -> drafts + SUMMARY.md")
+    pb.add_argument("--csv", required=True)
+    pb.add_argument("--out")
+    pb.set_defaults(func=do_batch)
+
+    for x in (pr, pg, pa, pb):
         x.add_argument("--mock", action="store_true", help="use fixtures, no API/network")
         x.add_argument("--model", default="claude-sonnet-4-6")
         x.add_argument("--fixtures", default=str(DEFAULT_FIXTURES))
         x.add_argument("--humanize", action="store_true", help="extra LLM editing pass")
         x.add_argument("--check-links", action="store_true", help="verify links resolve")
+        x.add_argument("--no-review", action="store_true", help="skip the LLM editorial review")
 
     args = p.parse_args()
     rc = args.func(args)

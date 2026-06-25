@@ -10,6 +10,7 @@ from __future__ import annotations
 import re
 import statistics
 from dataclasses import dataclass, field
+from datetime import date
 from typing import List
 
 from .schema import GeneratedSections, ResearchBundle
@@ -137,5 +138,27 @@ def run(md: str, bundle: ResearchBundle, sec: GeneratedSections,
                   f"{len(urls)} checked" if not broken else f"broken/unreachable: {broken}")
         except Exception as e:
             r.add("links_resolve", "skip", f"could not check ({e})")
+
+    # --- brand safety: don't publish unsourced criticism of competitors --- #
+    unsourced = [t.name for t in bundle.tools if not t.is_house and t.gaps and not t.sources]
+    r.add("competitor_gaps_sourced", "pass" if not unsourced else "warn",
+          "every competitor critique is sourced"
+          if not unsourced else f"gaps without a source: {unsourced}")
+
+    # --- brand safety: risky absolute claims stated as fact ---------------- #
+    superl = sorted({m.group(0) for m in re.finditer(
+        r"\b(the only|guaranteed|number one|unbeatable|world-class|the leading)\b", body)})
+    r.add("no_unverified_superlatives", "pass" if not superl else "warn",
+          "no risky absolute claims" if not superl else f"review these claims: {superl}")
+
+    # --- facts freshness: prices/ratings drift ----------------------------- #
+    if bundle.researched_at:
+        try:
+            age = (date.today() - date.fromisoformat(bundle.researched_at)).days
+            max_age = house_style.get("facts_max_age_days", 30)
+            r.add("facts_freshness", "pass" if age <= max_age else "warn",
+                  f"researched {age} day(s) ago (refresh after {max_age})")
+        except ValueError:
+            pass
 
     return r

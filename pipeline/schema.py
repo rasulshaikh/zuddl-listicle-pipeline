@@ -59,6 +59,7 @@ class ResearchBundle(BaseModel):
     dimensions: List[Dimension] = Field(default_factory=list)
     mode: str = "live"                        # "live" | "mock"
     model: str = ""
+    researched_at: str = ""                   # ISO date; powers the freshness QA check
 
     def house(self) -> Optional[ToolProfile]:
         return next((t for t in self.tools if t.is_house), None)

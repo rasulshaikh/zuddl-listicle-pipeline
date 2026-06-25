@@ -58,6 +58,7 @@ class LLMClient(Protocol):
     def derive_dimensions(self, category: str, audience: str, secondary_kws: List[str]) -> List[dict]: ...
     def write_section(self, task: str, context: dict) -> dict: ...
     def edit_humanize(self, text: str, banned: List[str]) -> str: ...
+    def score_editorial(self, markdown: str, bundle) -> dict: ...
 
 
 # --------------------------------------------------------------------------- #
@@ -225,6 +226,18 @@ class LiveAnthropicClient:
         )
         return self._complete(prompt, use_search=False, max_tokens=2048).strip()
 
+    def score_editorial(self, markdown, bundle) -> dict:
+        prompt = (
+            "You are a skeptical senior B2B content editor. Score this listicle draft "
+            "0-100 on: intro hook quality (no clichés), genuinely differentiated 'Best "
+            "for' lines across tools, balanced and fair competitor coverage, absence of "
+            "fluff, and scannability.\n"
+            'Return ONLY JSON: {"score": int, "verdict": str (<=12 words), '
+            '"issues": [str] (up to 4 concrete, actionable fixes; [] if none)}.\n\n'
+            + markdown[:8000]
+        )
+        return extract_json(self._complete(prompt, use_search=False, max_tokens=600))
+
 
 # --------------------------------------------------------------------------- #
 # mock client
@@ -251,7 +264,33 @@ class MockClient:
         return self._research["dimensions"]
 
     def write_section(self, task, context):
+        if task == "seo_meta":
+            fixture = self._sections["seo_meta"]
+            # Keep the curated metadata for the fixture's own category; derive a
+            # coherent title/slug for any other keyword so batch rows stay valid.
+            if context["category"].lower() == self._research["category_label"].lower():
+                return fixture
+            small = {"and", "or", "for", "the", "of", "in", "on", "to", "with"}
+            cat, n, yr = context["category"], context["count"], context["year"]
+            titled = " ".join(w if w in small else w.capitalize() for w in cat.split())
+            meta = (f"Compare the {n} best {cat} for {context['audience']} in {yr} "
+                    "on the criteria that matter most.")
+            return {
+                "title": f"{n} Best {titled} ({yr})"[:60],
+                "meta_description": meta[:160],
+                "slug": "best-" + re.sub(r"[^a-z0-9]+", "-", cat.lower()).strip("-"),
+            }
         return self._sections[task]
 
     def edit_humanize(self, text, banned):
         return text  # mock: no-op
+
+    def score_editorial(self, markdown, bundle):
+        return {
+            "score": 88,
+            "verdict": "Publish-ready with minor polish.",
+            "issues": [
+                "Name a specific CRM in intro paragraph 2 to sharpen specificity.",
+                "Differentiate the Cvent vs Bizzabo 'Best for' lines more on company size.",
+            ],
+        }

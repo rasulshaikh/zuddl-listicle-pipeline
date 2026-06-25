@@ -39,6 +39,11 @@ A "95% ready" draft is not a quality opinion, so the pipeline encodes it as chec
 
 ## What breaks at scale, and what I'd add with more time
 
+Several scale concerns are **already addressed**: batch mode turns a spreadsheet into many
+drafts with a review-queue gate, each bundle carries a facts-freshness timestamp, brand-safety
+checks guard competitor comparisons, an LLM editorial review scores each draft, and per-run
+token/search usage is logged. The rest is future work:
+
 - **Review data is the fragile dependency.** G2/Capterra block scrapers and have no public API, so ratings come via web search + the human gate. At volume I'd add a cached, periodically-refreshed datastore of tool facts so every listicle reads from one verified source instead of re-fetching.
 - **Prices drift; drafts have a shelf life.** Needs a re-crawl cadence and a "facts older than N days" flag.
 - **Template sameness is an SEO risk.** 200 near-identical structures can read as thin to search engines. I'd add controlled variation (rotating intro patterns, ordering logic, dimension sets) and a near-duplicate detector across the published set.

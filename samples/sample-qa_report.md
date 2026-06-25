@@ -18,3 +18,12 @@
 | no_ai_tells | PASS | no banned phrases |
 | sentence_variety | PASS | stdev of sentence length = 10.0 (>=4 reads natural) |
 | links_resolve | SKIP | 16 links (run with --check-links) |
+| competitor_gaps_sourced | PASS | every competitor critique is sourced |
+| no_unverified_superlatives | PASS | no risky absolute claims |
+| facts_freshness | PASS | researched 0 day(s) ago (refresh after 30) |
+
+## Editorial review — 88/100
+_Publish-ready with minor polish._
+
+- Name a specific CRM in intro paragraph 2 to sharpen specificity.
+- Differentiate the Cvent vs Bizzabo 'Best for' lines more on company size.
