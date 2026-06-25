@@ -106,4 +106,5 @@ output/                       generated drafts + batch summaries (gitignored)
 ARCHITECTURE.md               1-page: criteria, design, tradeoffs, what breaks at scale
 ALIGNMENT.md                  requirement-by-requirement map to the brief
 LOOM.md                       timed shot-list for the walkthrough video
+PRECHECK.md                   pre-record / pre-flight checklist for the live demo
 ```
