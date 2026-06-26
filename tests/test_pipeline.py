@@ -52,3 +52,28 @@ def test_facts_guardrail_blocks_hallucinated_numbers():
 def test_extract_json_handles_fences_and_preamble():
     assert extract_json('Here you go:\n```json\n{"a": 1}\n```') == {"a": 1}
     assert extract_json('[1, 2, 3]') == [1, 2, 3]
+
+
+def test_research_failure_on_one_tool_falls_back_to_placeholder():
+    hs = yaml.safe_load((ROOT / "config" / "house_style.yaml").read_text())
+    inp = yaml.safe_load((ROOT / "config" / "categories" / "event_registration.yaml").read_text())
+
+    class FlakyClient(MockClient):
+        def research_tool(self, name, category, audience, is_house):
+            if name == "Bizzabo":
+                return {"missing": "the required name field"}
+            return super().research_tool(name, category, audience, is_house)
+
+    bundle = research.run(FlakyClient(FIX), inp, hs, "mock", "")
+    assert len(bundle.tools) == inp["tool_count"]
+    placeholder = next(t for t in bundle.tools if t.name == "Bizzabo")
+    assert placeholder.gaps == ["RESEARCH FAILED — fill in manually"]
+
+
+def test_qa_hard_fails_on_missing_section():
+    hs, _, bundle, sec, md = _build()
+    tampered = md.replace("## Quick comparison", "## Snapshot", 1)
+    report = qa.run(tampered, bundle, sec, hs)
+    assert report.hard_fail
+    sp = next(c for c in report.checks if c.name == "structure_present")
+    assert sp.status == "fail"

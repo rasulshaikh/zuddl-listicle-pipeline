@@ -12,9 +12,8 @@ whole pipeline runs offline and identical, so you're never stuck.
 ```bash
 pip install -r requirements.txt
 
-# load the key into the shell (not just the file):
-set -a; source .env; set +a
-echo $ANTHROPIC_API_KEY        # should print your key
+# the pipeline auto-loads .env (python-dotenv); confirm the key is set:
+grep ANTHROPIC_API_KEY .env
 ```
 
 - [ ] Enable **Web search** in the Claude Console (workspace capability settings). The API

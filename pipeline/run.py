@@ -24,10 +24,13 @@ import sys
 from pathlib import Path
 
 import yaml
+from dotenv import load_dotenv
 
 from . import assemble, generate, qa, research
 from .llm import LiveAnthropicClient, LiveOpenAIClient, MockClient
 from .schema import GeneratedSections, ResearchBundle
+
+load_dotenv()
 
 ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_FIXTURES = ROOT / "fixtures" / "event_registration_software"

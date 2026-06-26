@@ -17,9 +17,12 @@ from pathlib import Path
 import pandas as pd
 import streamlit as st
 import yaml
+from dotenv import load_dotenv
 
 from pipeline import assemble, generate, qa, research
 from pipeline.llm import LiveAnthropicClient, LiveOpenAIClient, MockClient
+
+load_dotenv()
 
 ROOT = Path(__file__).resolve().parent
 HOUSE = yaml.safe_load((ROOT / "config" / "house_style.yaml").read_text())
