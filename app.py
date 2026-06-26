@@ -12,6 +12,7 @@ Run:  pip install -r requirements-app.txt  &&  streamlit run app.py
 """
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 import pandas as pd
@@ -64,6 +65,10 @@ with st.sidebar:
 def make_client():
     if mock:
         return MockClient(FIXTURES)
+    key_name = "OPENAI_API_KEY" if provider == "openai" else "ANTHROPIC_API_KEY"
+    if not os.environ.get(key_name):
+        st.error(f"{key_name} not set. Add it to .env (auto-loaded) or switch to mock mode.")
+        st.stop()
     if provider == "openai":
         return LiveOpenAIClient(model=model, house_style=HOUSE)
     return LiveAnthropicClient(model=model, house_style=HOUSE)

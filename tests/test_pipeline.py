@@ -61,7 +61,7 @@ def test_research_failure_on_one_tool_falls_back_to_placeholder():
     class FlakyClient(MockClient):
         def research_tool(self, name, category, audience, is_house):
             if name == "Bizzabo":
-                return {"missing": "the required name field"}
+                return {}                          # missing the required "name" field
             return super().research_tool(name, category, audience, is_house)
 
     bundle = research.run(FlakyClient(FIX), inp, hs, "mock", "")
