@@ -57,21 +57,28 @@ with st.sidebar:
     mock = st.toggle("Mock mode (offline, no API)", value=True)
     provider = st.radio("Provider", ["anthropic", "openai"], horizontal=True, disabled=mock)
     model = st.text_input("Model", DEFAULT_MODEL[provider], disabled=mock)
-    st.caption("Mock uses bundled fixtures. Live needs the matching API key set "
-               "(ANTHROPIC_API_KEY or OPENAI_API_KEY) - and for Anthropic, web search "
-               "enabled in the Console.")
+    api_key_input = st.text_input(
+        "API key (optional)", type="password", disabled=mock,
+        help="Paste your own key to run live mode on your own account. Leave blank to "
+             "use the server's ANTHROPIC_API_KEY / OPENAI_API_KEY, if one is set.",
+    )
+    st.caption("Mock uses bundled fixtures. Live needs an API key above, or "
+               "ANTHROPIC_API_KEY / OPENAI_API_KEY set on the server - and for "
+               "Anthropic, web search enabled in the Console.")
 
 
 def make_client():
     if mock:
         return MockClient(FIXTURES)
     key_name = "OPENAI_API_KEY" if provider == "openai" else "ANTHROPIC_API_KEY"
-    if not os.environ.get(key_name):
-        st.error(f"{key_name} not set. Add it to .env (auto-loaded) or switch to mock mode.")
+    key = api_key_input.strip() or os.environ.get(key_name, "")
+    if not key:
+        st.error(f"No API key. Paste one in the sidebar, set {key_name} on the server, "
+                 "or switch to mock mode.")
         st.stop()
     if provider == "openai":
-        return LiveOpenAIClient(model=model, house_style=HOUSE)
-    return LiveAnthropicClient(model=model, house_style=HOUSE)
+        return LiveOpenAIClient(model=model, house_style=HOUSE, api_key=key)
+    return LiveAnthropicClient(model=model, house_style=HOUSE, api_key=key)
 
 
 def build_input() -> dict:
