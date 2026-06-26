@@ -191,3 +191,33 @@ def test_qa_hard_fails_on_missing_section():
     assert report.hard_fail
     sp = next(c for c in report.checks if c.name == "structure_present")
     assert sp.status == "fail"
+
+
+def test_facts_guardrail_does_not_false_positive_on_trailing_comma():
+    """Regression: PRICE_RE's old `[\\d,]+` character class swallowed a comma
+    that immediately follows a price in ordinary prose (e.g. "...$10,000, with
+    onboarding included"), producing a token like "$10,000," that can never
+    match the bundle's "$10,000/year" - a false hallucination flag on a fact
+    that was actually sourced and approved at gate 1.
+    """
+    hs, _, bundle, sec, md = _build()
+    price = bundle.tools[0].pricing
+    anchor = "more than a sign-up form."
+    tampered = md.replace(anchor, anchor + f" Contracts run {price}, with onboarding included.", 1)
+    report = qa.run(tampered, bundle, sec, hs)
+    ft = next(c for c in report.checks if c.name == "facts_traceable")
+    assert ft.status == "pass", ft.detail
+
+
+def test_primary_kw_in_title_tolerates_ampersand_and_filler_words():
+    """Regression: an LLM title that swaps "and" for "&" (or drops a filler
+    word) to fit the <=60-char budget used to hard-fail primary_kw_in_title
+    even though every substantive keyword term is present. The check now
+    requires the keyword's significant words to appear in the title rather
+    than an exact phrase match.
+    """
+    hs, _, bundle, sec, md = _build()
+    sec.title = f"6 Best {bundle.primary_keyword.replace(' and ', ' & ').title()} (2026)"
+    report = qa.run(md, bundle, sec, hs)
+    pk_check = next(c for c in report.checks if c.name == "primary_kw_in_title")
+    assert pk_check.status == "pass", pk_check.detail

@@ -148,9 +148,11 @@ class _GenerationMixin:
             prompt = (
                 f"Write SEO metadata for a listicle of the {context['count']} best "
                 f"{context['category']} for {context['audience']} ({context['year']}).\n"
-                'Return ONLY JSON: {"title": str (<=60 chars, include the count, the '
-                'category, and the year), "meta_description": str (<=158 chars, mention '
-                'the comparison angle), "slug": str (kebab-case, no year)}.'
+                'Return ONLY JSON: {"title": str (<=60 chars where possible, include the '
+                f'count, the year, and the key terms from "{context["category"]}" - if it '
+                'does not all fit, drop words like "Best" before you drop those key terms), '
+                '"meta_description": str (<=158 chars, mention the comparison angle), '
+                '"slug": str (kebab-case, no year)}.'
             )
             return extract_json(self._complete(prompt, use_search=False, max_tokens=512))
         raise ValueError(f"unknown task: {task}")

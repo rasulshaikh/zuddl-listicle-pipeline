@@ -15,7 +15,7 @@ from typing import List
 
 from .schema import GeneratedSections, ResearchBundle
 
-PRICE_RE = re.compile(r"\$[\d,]+(?:\.\d+)?")
+PRICE_RE = re.compile(r"\$(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?")
 RATING_RE = re.compile(r"\b\d(?:\.\d)?/5\b")
 LINK_RE = re.compile(r"\[[^\]]+\]\((https?://[^)\s]+)\)")
 SENT_RE = re.compile(r"[^.!?]+[.!?]")
@@ -82,13 +82,24 @@ def run(md: str, bundle: ResearchBundle, sec: GeneratedSections,
           hard=True)
 
     # --- SEO basics -------------------------------------------------------- #
+    # Token-based coverage (ignores stopwords + "event(s)", which is filler in
+    # this domain) instead of an exact substring match: a long primary keyword
+    # almost never survives verbatim once an LLM has to also fit count/year
+    # into a <=60-char title, and "&" for "and" shouldn't count as missing.
+    stop = {"for", "and", "the", "of", "in", "on", "to", "a", "an", "with", "event", "events"}
+
+    def _covered(kw: str, text: str) -> bool:
+        toks = [w for w in re.findall(r"[a-z]+", kw.lower()) if len(w) > 3 and w not in stop]
+        return all(t in text for t in toks) if toks else True
+
     r.add("meta_description_length",
           "pass" if len(sec.meta_description) <= 160 else "fail",
           f"{len(sec.meta_description)} chars (<=160)", hard=True)
     r.add("title_length", "pass" if len(sec.title) <= 65 else "warn",
           f"{len(sec.title)} chars (<=60 ideal)")
-    r.add("primary_kw_in_title", "pass" if pk in sec.title.lower() else "fail",
-          f'"{bundle.primary_keyword}" in title (got: "{sec.title}")', hard=True)
+    title_ok = _covered(bundle.primary_keyword, sec.title.lower())
+    r.add("primary_kw_in_title", "pass" if title_ok else "fail",
+          f'key terms from "{bundle.primary_keyword}" in title (got: "{sec.title}")', hard=True)
     h1_ok = f"# {sec.title}".lower() in body
     r.add("primary_kw_in_h1", "pass" if h1_ok else "fail",
           "H1 matches title" if h1_ok else f'no "# {sec.title}" heading found in body', hard=True)
@@ -96,15 +107,9 @@ def run(md: str, bundle: ResearchBundle, sec: GeneratedSections,
           "keyword used early")
 
     # --- secondary keyword coverage (the brief mandates secondary KWs) ----- #
-    stop = {"for", "and", "the", "of", "in", "on", "to", "a", "an", "with", "event", "events"}
-
-    def _covered(kw: str) -> bool:
-        toks = [w for w in re.findall(r"[a-z]+", kw.lower()) if len(w) > 3 and w not in stop]
-        return all(t in body for t in toks) if toks else True
-
     sec_kws = bundle.secondary_keywords
     if sec_kws:
-        miss = [k for k in sec_kws if not _covered(k)]
+        miss = [k for k in sec_kws if not _covered(k, body)]
         ratio = (len(sec_kws) - len(miss)) / len(sec_kws)
         r.add("secondary_kw_coverage", "pass" if ratio >= 0.6 else "warn",
               f"{len(sec_kws) - len(miss)}/{len(sec_kws)} covered"
