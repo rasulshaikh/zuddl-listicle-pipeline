@@ -88,9 +88,10 @@ def run(md: str, bundle: ResearchBundle, sec: GeneratedSections,
     r.add("title_length", "pass" if len(sec.title) <= 65 else "warn",
           f"{len(sec.title)} chars (<=60 ideal)")
     r.add("primary_kw_in_title", "pass" if pk in sec.title.lower() else "fail",
-          f'"{bundle.primary_keyword}" in title', hard=True)
-    r.add("primary_kw_in_h1", "pass" if f"# {sec.title}".lower() in body else "fail",
-          "H1 matches title", hard=True)
+          f'"{bundle.primary_keyword}" in title (got: "{sec.title}")', hard=True)
+    h1_ok = f"# {sec.title}".lower() in body
+    r.add("primary_kw_in_h1", "pass" if h1_ok else "fail",
+          "H1 matches title" if h1_ok else f'no "# {sec.title}" heading found in body', hard=True)
     r.add("primary_kw_in_intro", "pass" if pk in sec.intro_md.lower() else "warn",
           "keyword used early")
 
