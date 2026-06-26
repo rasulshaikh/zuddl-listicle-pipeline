@@ -98,15 +98,17 @@ def build_input() -> dict:
 # --------------------------------------------------------------------------- #
 if st.button("① Research", type="primary"):
     st.session_state.pop("result", None)
-    with st.spinner("Gathering tools + grounded facts..."):
+    with st.status("Gathering tools + grounded facts...", expanded=True) as status:
         try:
             client = make_client()
             st.session_state.bundle = research.run(
                 client, build_input(), HOUSE, "mock" if mock else "live",
-                "" if mock else model,
+                "" if mock else model, on_progress=status.write,
             )
             st.session_state.usage = getattr(client, "usage", None)
+            status.update(label="Research complete.", state="complete")
         except Exception as e:  # surface live API / Console errors cleanly
+            status.update(label="Research failed.", state="error")
             st.error(f"Research failed: {e}")
 
 
@@ -127,6 +129,7 @@ if "bundle" in st.session_state:
     edited = st.data_editor(
         df, disabled=["name", "is_house"], hide_index=True,
         use_container_width=True, key="facts_editor",
+        column_config={"best_for": st.column_config.TextColumn(width="large")},
     )
 
     with st.expander("Sources gathered during research"):
@@ -142,17 +145,23 @@ if "bundle" in st.session_state:
                 t.g2_rating = e["g2_rating"] or None
                 t.capterra_rating = e["capterra_rating"] or None
                 t.best_for = e["best_for"]
-        with st.spinner("Generating sections, assembling, running QA + editorial review..."):
+        with st.status("Generating sections, assembling, running QA + editorial review...",
+                        expanded=True) as status:
             try:
                 client = make_client()
-                sections = generate.run(client, b, HOUSE)
+                sections = generate.run(client, b, HOUSE, on_progress=status.write)
+                status.write("Assembling draft...")
                 md = assemble.run(b, sections, HOUSE)
+                status.write("Running QA...")
                 report = qa.run(md, b, sections, HOUSE)
+                status.write("Scoring editorial review...")
                 editorial = client.score_editorial(md, b)
                 st.session_state.result = {
                     "md": md, "report": report, "editorial": editorial, "sections": sections,
                 }
+                status.update(label="Generation complete.", state="complete")
             except Exception as e:
+                status.update(label="Generation failed.", state="error")
                 st.error(f"Generation failed: {e}")
 
 

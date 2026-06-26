@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import json
 import re
+import threading
 from pathlib import Path
 from typing import List, Protocol
 
@@ -189,6 +190,7 @@ class LiveAnthropicClient(_GenerationMixin):
         self.house = house_style
         self.client = anthropic.Anthropic(api_key=api_key) if api_key else anthropic.Anthropic()
         self.usage = {"calls": 0, "input_tokens": 0, "output_tokens": 0, "web_searches": 0}
+        self._usage_lock = threading.Lock()
 
     def _complete(self, prompt: str, *, use_search: bool, max_tokens: int = 2048) -> str:
         """One completion. Loops on pause_turn so long searches don't get cut off."""
@@ -233,13 +235,14 @@ class LiveAnthropicClient(_GenerationMixin):
                 else:
                     raise
         u = getattr(resp, "usage", None)
-        if u:
-            self.usage["input_tokens"] += getattr(u, "input_tokens", 0) or 0
-            self.usage["output_tokens"] += getattr(u, "output_tokens", 0) or 0
-            stu = getattr(u, "server_tool_use", None)
-            if stu:
-                self.usage["web_searches"] += getattr(stu, "web_search_requests", 0) or 0
-        self.usage["calls"] += 1
+        with self._usage_lock:
+            if u:
+                self.usage["input_tokens"] += getattr(u, "input_tokens", 0) or 0
+                self.usage["output_tokens"] += getattr(u, "output_tokens", 0) or 0
+                stu = getattr(u, "server_tool_use", None)
+                if stu:
+                    self.usage["web_searches"] += getattr(stu, "web_search_requests", 0) or 0
+            self.usage["calls"] += 1
         return resp
 
 
@@ -257,6 +260,7 @@ class LiveOpenAIClient(_GenerationMixin):
         # older models (e.g. gpt-4o) need "web_search_preview"; GPT-5.x use "web_search"
         self.web_search_type = web_search_type
         self.usage = {"calls": 0, "input_tokens": 0, "output_tokens": 0, "web_searches": 0}
+        self._usage_lock = threading.Lock()
 
     def _complete(self, prompt: str, *, use_search: bool, max_tokens: int = 2048) -> str:
         tools = [{"type": self.web_search_type}] if use_search else []
@@ -284,16 +288,17 @@ class LiveOpenAIClient(_GenerationMixin):
                 else:
                     raise
         u = getattr(resp, "usage", None)
-        if u:
-            self.usage["input_tokens"] += getattr(u, "input_tokens", 0) or 0
-            self.usage["output_tokens"] += getattr(u, "output_tokens", 0) or 0
-        self.usage["calls"] += 1
-        try:                                   # count hosted web_search tool calls
-            for item in getattr(resp, "output", []) or []:
-                if getattr(item, "type", "") == "web_search_call":
-                    self.usage["web_searches"] += 1
-        except Exception:
-            pass
+        with self._usage_lock:
+            if u:
+                self.usage["input_tokens"] += getattr(u, "input_tokens", 0) or 0
+                self.usage["output_tokens"] += getattr(u, "output_tokens", 0) or 0
+            self.usage["calls"] += 1
+            try:                               # count hosted web_search tool calls
+                for item in getattr(resp, "output", []) or []:
+                    if getattr(item, "type", "") == "web_search_call":
+                        self.usage["web_searches"] += 1
+            except Exception:
+                pass
         text = getattr(resp, "output_text", "") or ""
         if not text.strip():
             raise RuntimeError("OpenAI returned no text (model may have only made tool calls).")
