@@ -12,6 +12,7 @@ Run:  pip install -r requirements-app.txt  &&  streamlit run app.py
 """
 from __future__ import annotations
 
+import json
 import os
 import re
 from pathlib import Path
@@ -29,6 +30,7 @@ load_dotenv()
 ROOT = Path(__file__).resolve().parent
 HOUSE = yaml.safe_load((ROOT / "config" / "house_style.yaml").read_text())
 FIXTURES = ROOT / "fixtures" / "event_registration_software"
+MOCK_FIXTURE_CATEGORY = json.loads((FIXTURES / "research.json").read_text())["category_label"]
 ICON = {"pass": "✅", "warn": "⚠️", "fail": "❌", "skip": "➖"}
 DEFAULT_MODEL = {"anthropic": "claude-sonnet-4-6", "openai": "gpt-5.1-mini"}
 FRONTMATTER_RE = re.compile(r"^---\n.*?\n---\n\n", re.DOTALL)
@@ -123,16 +125,25 @@ if "bundle" in st.session_state:
     st.caption("Fix any wrong pricing or ratings before generating. This is the human "
                "checkpoint that keeps a hallucinated number from ever reaching a draft.")
 
+    if b.mode == "mock" and b.category_label.strip().lower() != MOCK_FIXTURE_CATEGORY.lower():
+        st.warning(
+            f"Mock mode only has fixture data for **{MOCK_FIXTURE_CATEGORY}**. The tools, "
+            f"facts, intro, and FAQ below are that demo content, not '{b.category_label}' - "
+            "only the title/meta adapt. Switch off Mock mode (and add an API key) for a real "
+            "run on this topic."
+        )
+
     df = pd.DataFrame([{
         "name": t.name, "is_house": t.is_house, "pricing": t.pricing,
         "g2_rating": t.g2_rating or "", "capterra_rating": t.capterra_rating or "",
-        "best_for": t.best_for,
     } for t in b.tools])
     edited = st.data_editor(
         df, disabled=["name", "is_house"], hide_index=True,
         use_container_width=True, key="facts_editor",
-        column_config={"best_for": st.column_config.TextColumn(width="large")},
     )
+
+    st.caption("Best for (full sentence - the table above is single-line only, so prose lives here)")
+    best_for_edits = {t.name: st.text_area(t.name, t.best_for, height=160) for t in b.tools}
 
     with st.expander("Sources gathered during research"):
         for t in b.tools:
@@ -146,7 +157,7 @@ if "bundle" in st.session_state:
                 t.pricing = e["pricing"]
                 t.g2_rating = e["g2_rating"] or None
                 t.capterra_rating = e["capterra_rating"] or None
-                t.best_for = e["best_for"]
+            t.best_for = best_for_edits[t.name]
         with st.status("Generating sections, assembling, running QA + editorial review...",
                         expanded=True) as status:
             try:
