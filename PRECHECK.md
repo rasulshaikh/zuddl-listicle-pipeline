@@ -21,7 +21,7 @@ grep ANTHROPIC_API_KEY .env
 - [ ] Offline smoke test (no spend, no network):
 
 ```bash
-python -m pytest -q                                                    # -> 4 passed
+python -m pytest -q                                                    # -> 10 passed
 python -m pipeline.run all --input config/categories/event_registration.yaml --mock   # -> all green
 ```
 
