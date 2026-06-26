@@ -45,6 +45,20 @@ print(c._complete('Search the web: what is the latest iPhone? One line.', use_se
 If the model string is rejected (404), pick one your key has access to and pass it later
 with `--model` (e.g. `--model claude-opus-4-8`).
 
+**Using OpenAI instead of Anthropic?** Set `OPENAI_API_KEY` and add `--provider openai` to
+every command (default model `gpt-5.1-mini`). Quick check:
+
+```bash
+python -c "import yaml; from pipeline.llm import LiveOpenAIClient; \
+hs=yaml.safe_load(open('config/house_style.yaml')); \
+c=LiveOpenAIClient('gpt-5.1-mini', hs); \
+print(c._complete('Search the web: latest iPhone? One line.', use_search=True)[:200])"
+```
+
+If your account only has older models, use `--model gpt-4o` and the client's
+`web_search_preview` fallback (set `web_search_type='web_search_preview'` when constructing
+the client, or just use a GPT-5.x model which supports `web_search`).
+
 ## T-2 min · pre-bake the slow part so the demo is instant
 
 ```bash

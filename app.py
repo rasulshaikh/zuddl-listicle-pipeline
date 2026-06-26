@@ -19,12 +19,13 @@ import streamlit as st
 import yaml
 
 from pipeline import assemble, generate, qa, research
-from pipeline.llm import LiveAnthropicClient, MockClient
+from pipeline.llm import LiveAnthropicClient, LiveOpenAIClient, MockClient
 
 ROOT = Path(__file__).resolve().parent
 HOUSE = yaml.safe_load((ROOT / "config" / "house_style.yaml").read_text())
 FIXTURES = ROOT / "fixtures" / "event_registration_software"
 ICON = {"pass": "✅", "warn": "⚠️", "fail": "❌", "skip": "➖"}
+DEFAULT_MODEL = {"anthropic": "claude-sonnet-4-6", "openai": "gpt-5.1-mini"}
 
 st.set_page_config(page_title="Listicle Pipeline", layout="wide")
 st.title("Listicle pipeline")
@@ -50,13 +51,19 @@ with st.sidebar:
     house = st.text_input("House product (always #1)", "Zuddl")
     st.divider()
     mock = st.toggle("Mock mode (offline, no API)", value=True)
-    model = st.text_input("Model", "claude-sonnet-4-6", disabled=mock)
-    st.caption("Mock uses bundled fixtures. Live needs ANTHROPIC_API_KEY set and web "
-               "search enabled in the Claude Console.")
+    provider = st.radio("Provider", ["anthropic", "openai"], horizontal=True, disabled=mock)
+    model = st.text_input("Model", DEFAULT_MODEL[provider], disabled=mock)
+    st.caption("Mock uses bundled fixtures. Live needs the matching API key set "
+               "(ANTHROPIC_API_KEY or OPENAI_API_KEY) — and for Anthropic, web search "
+               "enabled in the Console.")
 
 
 def make_client():
-    return MockClient(FIXTURES) if mock else LiveAnthropicClient(model=model, house_style=HOUSE)
+    if mock:
+        return MockClient(FIXTURES)
+    if provider == "openai":
+        return LiveOpenAIClient(model=model, house_style=HOUSE)
+    return LiveAnthropicClient(model=model, house_style=HOUSE)
 
 
 def build_input() -> dict:

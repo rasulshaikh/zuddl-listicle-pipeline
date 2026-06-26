@@ -20,11 +20,14 @@ requirement-by-requirement map to the brief.
 
 ```bash
 pip install -r requirements.txt
-cp .env.example .env          # then add your key:  ANTHROPIC_API_KEY=sk-ant-...
+cp .env.example .env     # add the key for whichever provider you'll use:
+#   ANTHROPIC_API_KEY=sk-ant-...   (Claude)   and/or   OPENAI_API_KEY=sk-...   (GPT)
 ```
 
-> **Live mode gotcha:** an org admin must enable **web search** in the Claude Console,
-> or every research call returns a 400. (Mock mode needs neither a key nor the network.)
+> **Live mode gotchas:** for **Anthropic**, an org admin must enable **web search** in the
+> Claude Console or research 400s. For **OpenAI**, web search needs a supported model
+> (GPT-5.x use `web_search`; older models like `gpt-4o` need `web_search_preview`).
+> Mock mode needs neither a key nor the network.
 
 ## Run it
 
@@ -45,16 +48,20 @@ python -m pipeline.run batch --csv config/batch_example.csv --mock
 #   -> output/batch_<ts>/SUMMARY.md flags which drafts need a human (gate 2 at scale)
 ```
 
-**Live mode** — drop `--mock` (and optionally pick a model / extra editing / link checks):
+**Live mode** — drop `--mock`. Pick a provider with `--provider` (default `anthropic`):
 
 ```bash
+# Anthropic (Claude):
 python -m pipeline.run research --input config/categories/event_registration.yaml
-python -m pipeline.run generate --research output/<cat>/research.json --humanize --check-links
+
+# OpenAI (GPT) — uses the Responses API web_search tool:
+python -m pipeline.run research --input config/categories/event_registration.yaml --provider openai
+python -m pipeline.run generate --research output/<cat>/research.json --provider openai
 ```
 
-Flags: `--mock` (fixtures) · `--model claude-sonnet-4-6` (default; `claude-opus-4-8` for
-max quality) · `--humanize` (extra LLM editing pass) · `--check-links` (verify links
-resolve) · `--out DIR` · `--fixtures DIR`.
+Flags: `--provider {anthropic,openai}` · `--model` (defaults: `claude-sonnet-4-6` /
+`gpt-5.1-mini`; pass any model your key has) · `--mock` (fixtures) · `--humanize` (extra
+LLM editing pass) · `--check-links` (verify links) · `--no-review` (skip editorial) · `--out DIR`.
 
 ## App (optional UI for the content team)
 
@@ -106,7 +113,7 @@ config/
   batch_example.csv           many keyword sets for the batch command
 pipeline/
   schema.py                   data contracts (the fact-carrying bundle)
-  llm.py                      LLMClient: LiveAnthropic (web search) + Mock (fixtures)
+  llm.py                      LLMClient: Anthropic + OpenAI transports + Mock (fixtures)
   research.py                 stage 1 — grounded intel  -> ResearchBundle
   generate.py                 stage 2 — intro / FAQ / SEO metadata only
   assemble.py                 stage 3 — deterministic template + hyperlinking

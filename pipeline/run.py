@@ -12,6 +12,7 @@ Examples
   python -m pipeline.run generate --research output/<slug>/research.json --mock
   python -m pipeline.run all --input config/categories/event_registration.yaml --mock
   python -m pipeline.run batch --csv config/batch_example.csv --mock
+  python -m pipeline.run research --input config/categories/event_registration.yaml --provider openai
 """
 from __future__ import annotations
 
@@ -25,7 +26,7 @@ from pathlib import Path
 import yaml
 
 from . import assemble, generate, qa, research
-from .llm import LiveAnthropicClient, MockClient
+from .llm import LiveAnthropicClient, LiveOpenAIClient, MockClient
 from .schema import GeneratedSections, ResearchBundle
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -40,9 +41,20 @@ def _house_style() -> dict:
     return _load_yaml(ROOT / "config" / "house_style.yaml")
 
 
-def _client(mock: bool, model: str, house_style: dict, fixtures: str):
+def _resolve_model(provider: str, model: str | None) -> str:
+    if model:
+        return model
+    return "gpt-5.1-mini" if provider == "openai" else "claude-sonnet-4-6"
+
+
+def _client(mock: bool, provider: str, model: str, house_style: dict, fixtures: str):
     if mock:
         return MockClient(fixtures)
+    if provider == "openai":
+        key = os.environ.get("OPENAI_API_KEY")
+        if not key:
+            sys.exit("ERROR: OPENAI_API_KEY not set. Add it to .env or run with --mock.")
+        return LiveOpenAIClient(model=model, house_style=house_style, api_key=key)
     key = os.environ.get("ANTHROPIC_API_KEY")
     if not key:
         sys.exit("ERROR: ANTHROPIC_API_KEY not set. Add it to .env or run with --mock.")
@@ -68,10 +80,11 @@ def _print_usage(client):
 def do_research(args) -> ResearchBundle:
     inp, hs = _load_yaml(args.input), _house_style()
     mode = "mock" if args.mock else "live"
-    client = _client(args.mock, args.model, hs, args.fixtures)
+    model = _resolve_model(args.provider, args.model)
+    client = _client(args.mock, args.provider, model, hs, args.fixtures)
 
-    print(f"[1/1] Researching {inp['tool_count']} {inp['category_label']} ({mode})...")
-    bundle = research.run(client, inp, hs, mode, "" if args.mock else args.model)
+    print(f"[1/1] Researching {inp['tool_count']} {inp['category_label']} ({mode}, {args.provider})...")
+    bundle = research.run(client, inp, hs, mode, "" if args.mock else model)
 
     out = _outdir(inp["category_label"], args.out)
     (out / "research.json").write_text(bundle.model_dump_json(indent=2))
@@ -93,7 +106,8 @@ def do_generate(args, bundle: ResearchBundle | None = None) -> int:
     if bundle is None:
         bundle = ResearchBundle.model_validate_json(Path(args.research).read_text())
     mode = bundle.mode
-    client = _client(mode == "mock", args.model, hs, args.fixtures)
+    model = _resolve_model(args.provider, args.model)
+    client = _client(mode == "mock", args.provider, model, hs, args.fixtures)
 
     print(f"[1/3] Generating sections ({mode})...")
     sections = generate.run(client, bundle, hs, humanize=args.humanize)
@@ -159,7 +173,8 @@ def do_batch(args) -> int:
     stamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
     base = Path(args.out) if args.out else ROOT / "output" / f"batch_{stamp}"
     base.mkdir(parents=True, exist_ok=True)
-    client = _client(args.mock, args.model, hs, args.fixtures)
+    model = _resolve_model(args.provider, args.model)
+    client = _client(args.mock, args.provider, model, hs, args.fixtures)
 
     summary = []
     for i, row in enumerate(rows, 1):
@@ -174,7 +189,7 @@ def do_batch(args) -> int:
         }
         print(f"[{i}/{len(rows)}] {inp['category_label']} ({mode})...")
         try:
-            bundle = research.run(client, inp, hs, mode, "" if args.mock else args.model)
+            bundle = research.run(client, inp, hs, mode, "" if args.mock else model)
             sections = generate.run(client, bundle, hs, humanize=args.humanize)
             md = assemble.run(bundle, sections, hs)
             report = qa.run(md, bundle, sections, hs, check_links=args.check_links)
@@ -236,7 +251,9 @@ def main():
 
     for x in (pr, pg, pa, pb):
         x.add_argument("--mock", action="store_true", help="use fixtures, no API/network")
-        x.add_argument("--model", default="claude-sonnet-4-6")
+        x.add_argument("--provider", choices=["anthropic", "openai"], default="anthropic",
+                       help="LLM provider (default anthropic)")
+        x.add_argument("--model", default=None, help="model override (default depends on provider)")
         x.add_argument("--fixtures", default=str(DEFAULT_FIXTURES))
         x.add_argument("--humanize", action="store_true", help="extra LLM editing pass")
         x.add_argument("--check-links", action="store_true", help="verify links resolve")
