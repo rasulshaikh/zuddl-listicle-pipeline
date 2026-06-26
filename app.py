@@ -13,6 +13,7 @@ Run:  pip install -r requirements-app.txt  &&  streamlit run app.py
 from __future__ import annotations
 
 import os
+import re
 from pathlib import Path
 
 import pandas as pd
@@ -30,6 +31,7 @@ HOUSE = yaml.safe_load((ROOT / "config" / "house_style.yaml").read_text())
 FIXTURES = ROOT / "fixtures" / "event_registration_software"
 ICON = {"pass": "✅", "warn": "⚠️", "fail": "❌", "skip": "➖"}
 DEFAULT_MODEL = {"anthropic": "claude-sonnet-4-6", "openai": "gpt-5.1-mini"}
+FRONTMATTER_RE = re.compile(r"^---\n.*?\n---\n\n", re.DOTALL)
 
 st.set_page_config(page_title="Listicle Pipeline", layout="wide")
 st.title("Listicle pipeline")
@@ -192,4 +194,4 @@ if "result" in st.session_state:
     with left:
         st.download_button("⬇ Download draft.md", res["md"],
                            file_name=(res["sections"].slug or "draft") + ".md")
-        st.markdown(res["md"])
+        st.markdown(FRONTMATTER_RE.sub("", res["md"], count=1))
