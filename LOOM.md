@@ -22,6 +22,11 @@ mention that dropping `--mock` does the same thing live.
 - `pipeline/qa.py` — point at `facts_traceable` (the guardrail) and the brand-safety checks.
 
 ## 3 · Live demo (5 min)
+
+**Tip:** you can drive this segment either in the terminal (below) or in the Streamlit UI
+(`streamlit run app.py`) — the UI makes the two gates more visual for a non-engineer
+audience. Pick one and rehearse it.
+
 - Gate 1:
   `python -m pipeline.run research --input config/categories/event_registration.yaml --mock`
   Open `output/.../research.json`, point out pricing/ratings/sources a human verifies here.

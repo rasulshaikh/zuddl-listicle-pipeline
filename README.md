@@ -56,6 +56,20 @@ Flags: `--mock` (fixtures) · `--model claude-sonnet-4-6` (default; `claude-opus
 max quality) · `--humanize` (extra LLM editing pass) · `--check-links` (verify links
 resolve) · `--out DIR` · `--fixtures DIR`.
 
+## App (optional UI for the content team)
+
+A thin Streamlit front door over the same pipeline — for non-engineers who'd rather click
+than run commands. It makes the two gates operable: an editable table of researched facts
+(gate 1) and the rendered draft + QA checklist + editorial score (gate 2).
+
+```bash
+pip install -r requirements-app.txt
+streamlit run app.py
+```
+
+Toggle **Mock mode** in the sidebar to demo offline; untoggle to run live. It reuses
+`research.run` / `generate.run` / `assemble.run` / `qa.run` directly — no duplicated logic.
+
 ## Make a new listicle
 
 Copy `config/categories/event_registration.yaml`, change the keywords, audience, count,
@@ -98,6 +112,7 @@ pipeline/
   assemble.py                 stage 3 — deterministic template + hyperlinking
   qa.py                       stage 4 — structural + fact + brand-safety + humanization
   run.py                      CLI: research / generate / all / batch  (the two gates)
+app.py                        optional Streamlit UI over the same pipeline (the two gates, visual)
 tests/test_pipeline.py        offline regression tests (incl. the guardrail)  -> pytest -q
 .github/workflows/ci.yml      CI: runs pytest + an offline pipeline smoke test
 fixtures/                     synthetic sample data for mock runs

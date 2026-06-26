@@ -33,6 +33,7 @@ The reference (`zuddl.com/blog/best-mobile-event-apps-b2b-conferences`) and `sam
 | Extra | Why it matters |
 | --- | --- |
 | **Batch mode** (`batch --csv`) | The brief's real pain is *high-volume* content. One spreadsheet → many drafts + a triage `SUMMARY.md`; the human gate becomes a review queue, so only WARN/FAIL rows need attention. |
+| **Streamlit UI** (`app.py`) | A human-friendly front door for the content team: edit researched facts in a table (gate 1), then review the draft + QA + editorial score (gate 2). Thin layer over the same pipeline functions — no duplicated logic. |
 | **LLM editorial review** | A rubric score + concrete fixes at gate 2 — automated senior-editor judgment, not just regex. |
 | **Brand-safety checks** | For a vendor publishing competitor comparisons: every competitor critique must be sourced, and risky absolute claims ("the only", "guaranteed") are flagged. |
 | **Facts freshness** | Prices and ratings drift; each research bundle is date-stamped and QA warns when it goes stale. |
