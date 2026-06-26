@@ -3,7 +3,7 @@
 Three implementations behind one interface:
   - LiveAnthropicClient: real Claude calls (server-side web_search for grounding).
   - LiveOpenAIClient: real OpenAI calls via the Responses API (web_search tool).
-  - MockClient: reads fixtures from disk — runs the whole pipeline offline.
+  - MockClient: reads fixtures from disk - runs the whole pipeline offline.
 
 All prompt construction lives once in _GenerationMixin; each provider implements
 only its own transport (_complete). That is the payoff of the interface: adding a
@@ -102,7 +102,7 @@ class _GenerationMixin:
             f"Return ONLY a JSON object matching this schema: {schema}\n"
             "Rules: pricing as a short string like 'From $10,000/year' or "
             "'Custom pricing'. Ratings like '4.6/5'. Use null for anything you cannot "
-            "verify — never guess a number. strengths: 3-5 concise factual bullet "
+            "verify - never guess a number. strengths: 3-5 concise factual bullet "
             "phrases. gaps: 1-3 honest limitations (yes, even for the vendor's own "
             "product). best_for: one sentence naming the team/use case. sources: the "
             "URLs you actually used.\n" + self._voice_rules()
@@ -225,7 +225,7 @@ class LiveAnthropicClient(_GenerationMixin):
                 code = getattr(e, "status_code", None)
                 if code == 400 and "web_search" in str(e).lower():
                     raise RuntimeError(
-                        "web_search returned 400 — an org admin must enable Web Search in "
+                        "web_search returned 400 - an org admin must enable Web Search in "
                         "the Claude Console before research can run."
                     ) from e
                 if code in (500, 503, 529) and attempt < 4:

@@ -83,7 +83,7 @@ def run(bundle: ResearchBundle, sec: GeneratedSections, house_style: dict) -> st
     for t in bundle.tools:
         name = _link(t.name, t.url)
         price = _link(t.pricing, t.pricing_url)
-        g2 = _link(t.g2_rating, t.g2_url) if t.g2_rating else "—"
+        g2 = _link(t.g2_rating, t.g2_url) if t.g2_rating else "-"
         best = t.best_for.replace("|", "/")
         md.append(f"| {name} | {best} | {price} | {g2} |")
     md.append("")

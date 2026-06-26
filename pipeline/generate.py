@@ -3,7 +3,7 @@
 Produces only the *connective* editorial content: the intro hook, the FAQ, and
 the SEO metadata. The per-tool bullets, pricing, ratings and the buyer's-guide
 dimensions are facts that already live in the (human-approved) bundle, so they
-are NOT regenerated here — that is the guardrail against hallucinated facts.
+are NOT regenerated here - that is the guardrail against hallucinated facts.
 """
 from __future__ import annotations
 

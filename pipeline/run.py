@@ -71,7 +71,7 @@ def _outdir(slug_or_cat: str, override: str | None) -> Path:
 
 
 def _print_usage(client):
-    """Live client only — shows token + web-search spend for the run."""
+    """Live client only - shows token + web-search spend for the run."""
     u = getattr(client, "usage", None)
     if not u:
         return
@@ -95,7 +95,7 @@ def do_research(args) -> ResearchBundle:
     print(f"\n  {'TOOL':<14}{'PRICING':<26}{'G2':<8}SOURCES")
     for t in bundle.tools:
         star = "*" if t.is_house else " "
-        print(f" {star}{t.name:<13}{t.pricing[:24]:<26}{(t.g2_rating or '—'):<8}{len(t.sources)}")
+        print(f" {star}{t.name:<13}{t.pricing[:24]:<26}{(t.g2_rating or '-'):<8}{len(t.sources)}")
     print(f"\n  -> {out/'research.json'}")
     _print_usage(client)
     print("\n  GATE 1 (human): open research.json, verify pricing/ratings/tools, edit as")
@@ -129,28 +129,28 @@ def do_generate(args, bundle: ResearchBundle | None = None) -> int:
         mark = {"pass": "PASS", "warn": "WARN", "fail": "FAIL", "skip": "skip"}[c.status]
         print(f"   [{mark}] {c.name:<26} {c.detail}")
     if editorial:
-        print(f"\n  editorial review: {editorial['score']}/100 — {editorial['verdict']}")
+        print(f"\n  editorial review: {editorial['score']}/100 - {editorial['verdict']}")
         for issue in editorial.get("issues", []):
             print(f"    · {issue}")
     print(f"\n  -> {out/'draft.md'}\n  -> {out/'qa_report.md'}")
     _print_usage(client)
 
     if report.hard_fail:
-        print("\n  GATE 2: hard checks FAILED — fix before publishing. (exit 1)")
+        print("\n  GATE 2: hard checks FAILED - fix before publishing. (exit 1)")
         return 1
     print("\n  GATE 2 (human): skim draft.md for tone + the intro hook, then publish.")
     return 0
 
 
 def _write_report(path: Path, report, sections: GeneratedSections, editorial=None):
-    lines = [f"# QA report — {sections.title}", "",
+    lines = [f"# QA report - {sections.title}", "",
              f"- words: {report.word_count}  ·  read time: ~{report.read_minutes} min",
              f"- hard fail: {report.hard_fail}", "", "| check | status | detail |",
              "| --- | --- | --- |"]
     for c in report.checks:
         lines.append(f"| {c.name} | {c.status.upper()} | {c.detail} |")
     if editorial:
-        lines += ["", f"## Editorial review — {editorial['score']}/100",
+        lines += ["", f"## Editorial review - {editorial['score']}/100",
                   f"_{editorial['verdict']}_", ""]
         lines += [f"- {i}" for i in editorial.get("issues", [])] or ["- (no issues flagged)"]
     path.write_text("\n".join(lines) + "\n")
@@ -165,7 +165,7 @@ def do_all(args) -> int:
 def do_batch(args) -> int:
     """High-volume path: one row per listicle. Produces drafts + a triage summary.
 
-    The human gate becomes a *review queue* — instead of pausing on every article,
+    The human gate becomes a *review queue* - instead of pausing on every article,
     the run flags which drafts have warnings/failures so a human triages only those.
     """
     hs = _house_style()

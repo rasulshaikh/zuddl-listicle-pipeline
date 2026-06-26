@@ -26,19 +26,19 @@ A direct map from what Zuddl asked for to where it lives in this system.
 
 ## How the output matches the reference listicle
 
-The reference (`zuddl.com/blog/best-mobile-event-apps-b2b-conferences`) and `samples/sample-draft.md` share the same anatomy: SEO frontmatter → scene-setting intro that frames "basic tool vs operational layer" → linked quick-comparison table → per-tool sections (one-liner, **What it does well**, **Where it has gaps**, **Pricing**, **Ratings**, **Best for**) → buyer's-guide with failure-mode lines → FAQ → CTA. The house product is placed first and still lists an honest gap — the credibility pattern the reference uses.
+The reference (`zuddl.com/blog/best-mobile-event-apps-b2b-conferences`) and `samples/sample-draft.md` share the same anatomy: SEO frontmatter → scene-setting intro that frames "basic tool vs operational layer" → linked quick-comparison table → per-tool sections (one-liner, **What it does well**, **Where it has gaps**, **Pricing**, **Ratings**, **Best for**) → buyer's-guide with failure-mode lines → FAQ → CTA. The house product is placed first and still lists an honest gap - the credibility pattern the reference uses.
 
 ## Beyond the ask (elite extensions)
 
 | Extra | Why it matters |
 | --- | --- |
 | **Batch mode** (`batch --csv`) | The brief's real pain is *high-volume* content. One spreadsheet → many drafts + a triage `SUMMARY.md`; the human gate becomes a review queue, so only WARN/FAIL rows need attention. |
-| **Streamlit UI** (`app.py`) | A human-friendly front door for the content team: edit researched facts in a table (gate 1), then review the draft + QA + editorial score (gate 2). Thin layer over the same pipeline functions — no duplicated logic. |
-| **Multi-provider** (`--provider`) | One `LLMClient` interface, two transports — Anthropic (Claude) and OpenAI (GPT, Responses API web_search). Prompt logic is shared, so swapping providers changes neither the pipeline nor the prompts. Proves the abstraction earns its keep. |
-| **LLM editorial review** | A rubric score + concrete fixes at gate 2 — automated senior-editor judgment, not just regex. |
+| **Streamlit UI** (`app.py`) | A human-friendly front door for the content team: edit researched facts in a table (gate 1), then review the draft + QA + editorial score (gate 2). Thin layer over the same pipeline functions - no duplicated logic. |
+| **Multi-provider** (`--provider`) | One `LLMClient` interface, two transports - Anthropic (Claude) and OpenAI (GPT, Responses API web_search). Prompt logic is shared, so swapping providers changes neither the pipeline nor the prompts. Proves the abstraction earns its keep. |
+| **LLM editorial review** | A rubric score + concrete fixes at gate 2 - automated senior-editor judgment, not just regex. |
 | **Brand-safety checks** | For a vendor publishing competitor comparisons: every competitor critique must be sourced, and risky absolute claims ("the only", "guaranteed") are flagged. |
 | **Facts freshness** | Prices and ratings drift; each research bundle is date-stamped and QA warns when it goes stale. |
 | **CI + tests** | GitHub Actions runs the `pytest` suite and an offline pipeline smoke test on every push. |
 | **Cost observability** | Per-run token and web-search counts, so spend is visible when running at volume. |
-| **Generality proof** | Three category inputs shipped (registration, mobile apps, lead capture) — the "swap the placeholder" claim, demonstrated. |
+| **Generality proof** | Three category inputs shipped (registration, mobile apps, lead capture) - the "swap the placeholder" claim, demonstrated. |
 

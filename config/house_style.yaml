@@ -1,11 +1,11 @@
-# House style — edit this to retune voice/brand without touching code.
+# House style - edit this to retune voice/brand without touching code.
 brand: Zuddl
 year: 2026
 canonical_base: "https://www.zuddl.com/blog/"
 
 # Voice guidance injected into every generation prompt.
 voice:
-  - "Direct, consultative, and concrete — like a senior practitioner advising a peer."
+  - "Direct, consultative, and concrete - like a senior practitioner advising a peer."
   - "Present tense, active voice, short paragraphs."
   - "Specific over vague: name features, numbers, and use cases."
   - "Balanced and credible: honest about trade-offs, including the house product's."

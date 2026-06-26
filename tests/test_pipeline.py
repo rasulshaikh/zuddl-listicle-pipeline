@@ -67,7 +67,7 @@ def test_research_failure_on_one_tool_falls_back_to_placeholder():
     bundle = research.run(FlakyClient(FIX), inp, hs, "mock", "")
     assert len(bundle.tools) == inp["tool_count"]
     placeholder = next(t for t in bundle.tools if t.name == "Bizzabo")
-    assert placeholder.gaps == ["RESEARCH FAILED — fill in manually"]
+    assert placeholder.gaps == ["RESEARCH FAILED - fill in manually"]
 
 
 def test_qa_hard_fails_on_missing_section():

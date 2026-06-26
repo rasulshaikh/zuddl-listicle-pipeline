@@ -1,7 +1,7 @@
 # Pre-flight checklist (before you record / submit)
 
 **Golden rule:** do the slow, flaky parts (anything that hits web search) *before* you
-hit record. Live research makes 7+ searches and takes a couple of minutes — pre-bake it
+hit record. Live research makes 7+ searches and takes a couple of minutes - pre-bake it
 so on camera you only run the fast, reliable steps. `--mock` is your panic button: the
 whole pipeline runs offline and identical, so you're never stuck.
 
@@ -28,13 +28,13 @@ python -m pipeline.run all --input config/categories/event_registration.yaml --m
 ## T-3 min · one cheap live call to confirm key + web search actually work
 
 ```bash
-# (a) basic call — tests key + model access:
+# (a) basic call - tests key + model access:
 python -c "import yaml; from pipeline.llm import LiveAnthropicClient; \
 hs=yaml.safe_load(open('config/house_style.yaml')); \
 c=LiveAnthropicClient('claude-sonnet-4-6', hs); \
 print(c._complete('Reply with OK only.', use_search=False))"
 
-# (b) web search — tests the Console toggle (a 400 here = search still off):
+# (b) web search - tests the Console toggle (a 400 here = search still off):
 python -c "import yaml; from pipeline.llm import LiveAnthropicClient; \
 hs=yaml.safe_load(open('config/house_style.yaml')); \
 c=LiveAnthropicClient('claude-sonnet-4-6', hs); \
@@ -74,18 +74,18 @@ Optionally pre-run a **live** batch once too, so you have a real `SUMMARY.md` to
 
 1. **Gate 1.** Open the pre-baked `output/event-registration-and-ticketing-software/research.json`.
    Point at pricing / ratings / **sources** a human verifies here.
-2. **Gate 2 (live, fast — no search):**
+2. **Gate 2 (live, fast - no search):**
    ```bash
    python -m pipeline.run generate --research output/event-registration-and-ticketing-software/research.json
    ```
    Show the all-green QA, the editorial score, then open `draft.md` next to the real
-   Zuddl post — same anatomy.
+   Zuddl post - same anatomy.
 3. **Scale:**
    ```bash
    python -m pipeline.run batch --csv config/batch_example.csv --mock
    ```
-   Open `output/batch_*/SUMMARY.md` — the triage queue. "This is the high-volume answer."
-4. **Troubleshooting (deterministic, won't flake)** — show the guardrail catch a hallucination:
+   Open `output/batch_*/SUMMARY.md` - the triage queue. "This is the high-volume answer."
+4. **Troubleshooting (deterministic, won't flake)** - show the guardrail catch a hallucination:
    ```bash
    python - <<'PY'
    import yaml, json
@@ -114,9 +114,9 @@ Optionally pre-run a **live** batch once too, so you have a real `SUMMARY.md` to
 - Any live error → the client auto-retries; if it persists, add `--mock` and say mock
   proves the mechanics.
 - A `web_search` 400 → that's the Console toggle. The clear error message is itself a nice
-  "good error handling" beat — enable it and rerun.
+  "good error handling" beat - enable it and rerun.
 - Keep the pre-baked `output/` from your successful live run open in a tab as a fallback.
 
 ## Two pro tips
 - Rehearse the exact command order once so there's no fumbling.
-- `--mock` runs everything offline and identical — it's the panic button if a live call stalls.
+- `--mock` runs everything offline and identical - it's the panic button if a live call stalls.

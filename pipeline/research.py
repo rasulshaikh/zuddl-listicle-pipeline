@@ -26,9 +26,9 @@ def run(client: LLMClient, inp: dict, house_style: dict, mode: str, model: str) 
         try:
             profiles.append(ToolProfile(**raw))
         except Exception as e:  # one bad tool shouldn't sink the run
-            print(f"  ! could not parse profile for {name}: {e} — inserting placeholder")
+            print(f"  ! could not parse profile for {name}: {e} - inserting placeholder")
             profiles.append(ToolProfile(name=name, is_house=(name == house),
-                                        gaps=["RESEARCH FAILED — fill in manually"]))
+                                        gaps=["RESEARCH FAILED - fill in manually"]))
 
     dims = [Dimension(**d) for d in client.derive_dimensions(
         category, audience, inp.get("secondary_keywords", []))]

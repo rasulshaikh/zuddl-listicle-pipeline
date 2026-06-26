@@ -1,6 +1,6 @@
 """Streamlit front door for the listicle pipeline.
 
-A thin presentation layer — it reuses the exact same pipeline functions the CLI
+A thin presentation layer - it reuses the exact same pipeline functions the CLI
 uses (research.run / generate.run / assemble.run / qa.run + the editorial judge),
 so there is zero duplicated logic. The UI's job is to make the two human gates
 operable by a non-engineer:
@@ -58,7 +58,7 @@ with st.sidebar:
     provider = st.radio("Provider", ["anthropic", "openai"], horizontal=True, disabled=mock)
     model = st.text_input("Model", DEFAULT_MODEL[provider], disabled=mock)
     st.caption("Mock uses bundled fixtures. Live needs the matching API key set "
-               "(ANTHROPIC_API_KEY or OPENAI_API_KEY) — and for Anthropic, web search "
+               "(ANTHROPIC_API_KEY or OPENAI_API_KEY) - and for Anthropic, web search "
                "enabled in the Console.")
 
 
@@ -87,7 +87,7 @@ def build_input() -> dict:
 
 
 # --------------------------------------------------------------------------- #
-# Stage 1 — research
+# Stage 1 - research
 # --------------------------------------------------------------------------- #
 if st.button("① Research", type="primary"):
     st.session_state.pop("result", None)
@@ -104,7 +104,7 @@ if st.button("① Research", type="primary"):
 
 
 # --------------------------------------------------------------------------- #
-# Gate 1 — verify the facts
+# Gate 1 - verify the facts
 # --------------------------------------------------------------------------- #
 if "bundle" in st.session_state:
     b = st.session_state.bundle
@@ -124,7 +124,7 @@ if "bundle" in st.session_state:
 
     with st.expander("Sources gathered during research"):
         for t in b.tools:
-            st.markdown(f"**{t.name}** — " + (", ".join(t.sources) if t.sources else "_none_"))
+            st.markdown(f"**{t.name}** - " + (", ".join(t.sources) if t.sources else "_none_"))
 
     if st.button("② Approve & generate", type="primary"):
         edits = {row["name"]: row for _, row in edited.iterrows()}
@@ -150,7 +150,7 @@ if "bundle" in st.session_state:
 
 
 # --------------------------------------------------------------------------- #
-# Gate 2 — review & publish
+# Gate 2 - review & publish
 # --------------------------------------------------------------------------- #
 if "result" in st.session_state:
     res = st.session_state.result
@@ -161,7 +161,7 @@ if "result" in st.session_state:
     with right:
         rep = res["report"]
         if rep.hard_fail:
-            st.error("Hard checks failed — fix before publishing.")
+            st.error("Hard checks failed - fix before publishing.")
         else:
             st.success("All hard checks passed.")
         st.metric("Editorial score", f'{res["editorial"]["score"]}/100')
@@ -170,7 +170,7 @@ if "result" in st.session_state:
             st.caption("• " + issue)
         st.markdown("**QA**")
         for c in rep.checks:
-            st.write(f'{ICON[c.status]} {c.name} — {c.detail}')
+            st.write(f'{ICON[c.status]} {c.name} - {c.detail}')
         st.caption(f'{rep.word_count} words · ~{rep.read_minutes} min read')
 
     with left:

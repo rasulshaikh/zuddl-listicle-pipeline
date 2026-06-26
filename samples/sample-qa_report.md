@@ -1,4 +1,4 @@
-# QA report — 6 Best Event Registration and Ticketing Software (2026)
+# QA report - 6 Best Event Registration and Ticketing Software (2026)
 
 - words: 1749  ·  read time: ~9 min
 - hard fail: False
@@ -22,7 +22,7 @@
 | no_unverified_superlatives | PASS | no risky absolute claims |
 | facts_freshness | PASS | researched 0 day(s) ago (refresh after 30) |
 
-## Editorial review — 88/100
+## Editorial review - 88/100
 _Publish-ready with minor polish._
 
 - Name a specific CRM in intro paragraph 2 to sharpen specificity.
